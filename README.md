@@ -275,6 +275,18 @@ curl -X POST http://localhost:8080/api/push/register-token \
 - 技术实现细节对比
 - 选择建议和适用场景
 
+### 多平台推送架构（Android + iOS）
+
+如果需要同时支持Android和iOS平台，请参考：[多平台推送架构设计](docs/multi-platform-push-architecture.md)
+
+该文档包含：
+- 统一推送服务架构设计
+- iOS推送（APNs）集成方案
+- 平台适配器模式实现
+- 设备信息管理
+- 完整的代码示例和数据库设计
+- 最佳实践和实施步骤
+
 ## 📚 更多资源
 
 - [Firebase Cloud Messaging 文档](https://firebase.google.com/docs/cloud-messaging)
