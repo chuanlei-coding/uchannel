@@ -1,0 +1,44 @@
+# 构建输出
+build/
+target/
+*.apk
+*.jar
+!gradle-wrapper.jar
+
+# Android
+.gradle/
+local.properties
+*.iml
+.idea/
+*.keystore
+!debug.keystore
+
+# Java
+*.class
+*.log
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Firebase密钥（重要！不要提交）
+**/serviceAccountKey.json
+**/google-services.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# 日志
+logs/
+*.log
+

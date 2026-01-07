@@ -1,0 +1,25 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: push-notification-service
+
+# Firebase配置
+firebase:
+  # 服务账号密钥文件路径
+  # 可以放在类路径下（resources目录）或指定绝对路径
+  service-account-key: serviceAccountKey.json
+  # Firebase数据库URL（可选）
+  database-url: 
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.uchannel: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
