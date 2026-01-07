@@ -36,34 +36,64 @@ cd "${PROJECT_ROOT}/android"
 # 检查Gradle wrapper是否存在
 if [ ! -f "./gradlew" ]; then
     echo -e "${YELLOW}Gradle wrapper不存在，正在初始化...${NC}"
-    # 这里可以添加gradle wrapper初始化命令
     echo -e "${RED}错误: 请先运行 'gradle wrapper' 初始化Gradle wrapper${NC}"
-    exit 1
-fi
-
-# 赋予执行权限
-chmod +x ./gradlew
-
-# 清理并构建APK
-if [ "$BUILD_TYPE" = "release" ]; then
-    echo "构建Release APK..."
-    ./gradlew clean assembleRelease
-    APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+    echo -e "${YELLOW}跳过Android构建，继续构建后端...${NC}"
+    SKIP_ANDROID=true
 else
-    echo "构建Debug APK..."
-    ./gradlew clean assembleDebug
-    APK_FILE=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+    # 检查Android SDK是否配置
+    if [ ! -f "local.properties" ] || ! grep -q "^sdk.dir=" local.properties 2>/dev/null; then
+        echo -e "${YELLOW}警告: Android SDK未配置${NC}"
+        echo -e "${YELLOW}请配置 android/local.properties 文件，设置 sdk.dir 路径${NC}"
+        echo -e "${YELLOW}跳过Android构建，继续构建后端...${NC}"
+        SKIP_ANDROID=true
+    else
+        SKIP_ANDROID=false
+    fi
 fi
 
-if [ -z "$APK_FILE" ] || [ ! -f "$APK_FILE" ]; then
-    echo -e "${RED}错误: APK文件未找到${NC}"
-    exit 1
-fi
+if [ "$SKIP_ANDROID" != "true" ]; then
+    # 赋予执行权限
+    chmod +x ./gradlew
 
-# 复制APK到输出目录
-APK_NAME="uchannel-${BUILD_TYPE}-$(date +%Y%m%d-%H%M%S).apk"
-cp "$APK_FILE" "${APK_OUTPUT_DIR}/${APK_NAME}"
-echo -e "${GREEN}✓ APK构建成功: ${APK_OUTPUT_DIR}/${APK_NAME}${NC}"
+    # 清理并构建APK
+    if [ "$BUILD_TYPE" = "release" ]; then
+        echo "构建Release APK..."
+        if ./gradlew clean assembleRelease 2>&1; then
+            APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+            if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
+                # 复制APK到输出目录
+                APK_NAME="uchannel-${BUILD_TYPE}-$(date +%Y%m%d-%H%M%S).apk"
+                cp "$APK_FILE" "${APK_OUTPUT_DIR}/${APK_NAME}"
+                echo -e "${GREEN}✓ APK构建成功: ${APK_OUTPUT_DIR}/${APK_NAME}${NC}"
+            else
+                echo -e "${YELLOW}APK文件未找到，跳过Android构建${NC}"
+                SKIP_ANDROID=true
+            fi
+        else
+            echo -e "${YELLOW}Android构建失败，继续构建后端...${NC}"
+            SKIP_ANDROID=true
+        fi
+    else
+        echo "构建Debug APK..."
+        if ./gradlew clean assembleDebug 2>&1; then
+            APK_FILE=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+            if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
+                # 复制APK到输出目录
+                APK_NAME="uchannel-${BUILD_TYPE}-$(date +%Y%m%d-%H%M%S).apk"
+                cp "$APK_FILE" "${APK_OUTPUT_DIR}/${APK_NAME}"
+                echo -e "${GREEN}✓ APK构建成功: ${APK_OUTPUT_DIR}/${APK_NAME}${NC}"
+            else
+                echo -e "${YELLOW}APK文件未找到，跳过Android构建${NC}"
+                SKIP_ANDROID=true
+            fi
+        else
+            echo -e "${YELLOW}Android构建失败，继续构建后端...${NC}"
+            SKIP_ANDROID=true
+        fi
+    fi
+else
+    echo -e "${YELLOW}Android构建已跳过${NC}"
+fi
 
 # ==================== 构建后端JAR包 ====================
 echo -e "\n${YELLOW}[2/3] 构建后端JAR包...${NC}"

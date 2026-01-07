@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'com.google.gms.google-services'
 }
 
 android {
@@ -41,6 +40,14 @@ android {
     }
 }
 
+// 仅当存在 google-services.json 时才应用 Google Services 插件（避免缺失文件导致构建失败）
+def googleServicesFile = file("${projectDir}/google-services.json")
+if (googleServicesFile.exists()) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    logger.lifecycle("google-services.json not found, skipping Google Services plugin")
+}
+
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -55,5 +62,14 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    // JavaScript 引擎 - 使用 Rhino（纯 Java 实现的 JS 引擎）
+    // 注：J2V8/Duktape 在 Maven Central 上依赖不可用，使用 Rhino 作为替代
+    // Rhino 是 Mozilla 开发的纯 Java JavaScript 引擎，完全兼容 ECMAScript 5.1+
+    implementation 'org.mozilla:rhino:1.7.15'
+    
+    // Kotlin 协程
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 }
 

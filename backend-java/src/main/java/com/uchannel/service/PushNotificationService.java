@@ -328,9 +328,11 @@ public class PushNotificationService {
      * 判断是否为无效Token错误
      */
     private boolean isInvalidTokenError(FirebaseMessagingException e) {
-        String errorCode = e.getErrorCode();
-        return "invalid-registration-token".equals(errorCode) ||
-               "registration-token-not-registered".equals(errorCode);
+        String errorCode = e.getErrorCode().toString();
+        return "INVALID_ARGUMENT".equals(errorCode) ||
+               "UNREGISTERED".equals(errorCode) ||
+               errorCode.contains("INVALID") ||
+               errorCode.contains("UNREGISTERED");
     }
 
     /**

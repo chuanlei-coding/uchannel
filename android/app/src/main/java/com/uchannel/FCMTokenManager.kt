@@ -2,6 +2,7 @@ package com.uchannel
 
 import android.content.Context
 import android.util.Log
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 
 /**
@@ -21,23 +22,50 @@ class FCMTokenManager(private val context: Context) {
      * 获取当前FCM Token
      */
     fun getToken(callback: (String?) -> Unit) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "获取FCM Token失败", task.exception)
-                callback(null)
-                return@addOnCompleteListener
-            }
+        // 如果没有 google-services.json（或未初始化 FirebaseApp），直接跳过，避免启动闪退
+        if (!isFirebaseConfigured()) {
+            Log.w(TAG, "Firebase 未配置（缺少 google-services.json 或未初始化），跳过获取 FCM Token")
+            callback(null)
+            return
+        }
 
-            val token = task.result
-            Log.d(TAG, "FCM Token: $token")
-            
-            // 保存Token到本地
-            saveTokenLocally(token)
-            
-            // 发送到服务器
-            sendTokenToServer(token)
-            
-            callback(token)
+        try {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w(TAG, "获取FCM Token失败", task.exception)
+                    callback(null)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+                Log.d(TAG, "FCM Token: $token")
+
+                // 保存Token到本地
+                saveTokenLocally(token)
+
+                // 发送到服务器
+                sendTokenToServer(token)
+
+                callback(token)
+            }
+        } catch (e: Throwable) {
+            // 常见：Default FirebaseApp is not initialized
+            Log.w(TAG, "Firebase 未就绪，跳过获取 FCM Token: ${e.message}", e)
+            callback(null)
+        }
+    }
+
+    /**
+     * 判断 Firebase 是否已配置（用于没有 google-services.json 的临时构建场景）
+     */
+    private fun isFirebaseConfigured(): Boolean {
+        // 1) 通过 FirebaseApp 判断
+        return try {
+            if (FirebaseApp.getApps(context).isNotEmpty()) return true
+            // 2) 如果尚未初始化，尝试初始化（无配置时会返回 null）
+            FirebaseApp.initializeApp(context) != null
+        } catch (_: Throwable) {
+            false
         }
     }
 
@@ -82,6 +110,11 @@ class FCMTokenManager(private val context: Context) {
      * 订阅主题
      */
     fun subscribeToTopic(topic: String) {
+        if (!isFirebaseConfigured()) {
+            Log.w(TAG, "Firebase 未配置，跳过订阅主题: $topic")
+            return
+        }
+
         FirebaseMessaging.getInstance().subscribeToTopic(topic)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -96,6 +129,11 @@ class FCMTokenManager(private val context: Context) {
      * 取消订阅主题
      */
     fun unsubscribeFromTopic(topic: String) {
+        if (!isFirebaseConfigured()) {
+            Log.w(TAG, "Firebase 未配置，跳过取消订阅主题: $topic")
+            return
+        }
+
         FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
