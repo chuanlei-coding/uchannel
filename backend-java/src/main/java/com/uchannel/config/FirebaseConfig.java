@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 /**
  * Firebase配置类
  * 初始化Firebase Admin SDK
+ * 如果Firebase配置文件不存在，则跳过初始化（聊天功能不需要Firebase）
  */
 @Configuration
 public class FirebaseConfig {
@@ -51,9 +53,10 @@ public class FirebaseConfig {
             } else {
                 logger.info("Firebase App 已存在，跳过初始化");
             }
-        } catch (IOException e) {
-            logger.error("❌ Firebase初始化失败", e);
-            throw new RuntimeException("无法初始化Firebase", e);
+        } catch (Exception e) {
+            logger.warn("⚠️ Firebase配置文件未找到或初始化失败，跳过Firebase初始化（聊天功能不需要Firebase）: {}", e.getMessage());
+            logger.debug("Firebase初始化失败详情", e);
+            // 不抛出异常，允许应用继续启动
         }
     }
 
@@ -84,8 +87,12 @@ public class FirebaseConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "firebase.enabled", havingValue = "true", matchIfMissing = false)
     public FirebaseMessaging firebaseMessaging() {
-        return FirebaseMessaging.getInstance();
+        if (!FirebaseApp.getApps().isEmpty()) {
+            return FirebaseMessaging.getInstance();
+        }
+        throw new IllegalStateException("Firebase未初始化，无法创建FirebaseMessaging Bean");
     }
 }
 

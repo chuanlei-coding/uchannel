@@ -16,6 +16,15 @@
         android:gravity="center"
         android:layout_marginBottom="16dp" />
 
+    <Button
+        android:id="@+id/btnChat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="打开日程安排助手"
+        android:textSize="16sp"
+        android:backgroundTint="#07c160"
+        android:layout_marginBottom="16dp" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -5,6 +5,7 @@ import com.uchannel.dto.PushResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class PushNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(PushNotificationService.class);
     private static final int MAX_BATCH_SIZE = 1000; // FCM批量推送最大数量
 
-    @Autowired
+    @Autowired(required = false)
     private FirebaseMessaging firebaseMessaging;
 
     /**

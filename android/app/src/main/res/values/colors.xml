@@ -3,5 +3,7 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+    <color name="uchannel_banner">#6200EE</color>
+    <color name="chat_header">#2e2e2e</color>
 </resources>
 

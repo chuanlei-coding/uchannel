@@ -26,6 +26,11 @@ local.properties
 **/serviceAccountKey.json
 **/google-services.json
 
+# SSL证书和密钥（重要！不要提交）
+*.p12
+*.keystore
+!debug.keystore
+
 # 系统文件
 .DS_Store
 Thumbs.db

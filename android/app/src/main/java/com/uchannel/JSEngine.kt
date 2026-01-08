@@ -18,7 +18,6 @@ class JSEngine {
 
     companion object {
         private const val TAG = "JSEngine"
-        private var consoleInjected = false  // 标记 console API 是否已注入到全局作用域
     }
 
     /**
@@ -37,17 +36,16 @@ class JSEngine {
 
     /**
      * 在当前线程创建 Context 和 Scope
+     * 注意：每次创建新的 Context/Scope 都需要重新注入 console API
      */
     private fun createContextAndScope(): Pair<Context, Scriptable> {
         val ctx = Context.enter()
         ctx.optimizationLevel = -1  // 禁用优化以获得更好的错误信息
         val scope = ctx.initStandardObjects()
         
-        // 只在第一次创建时注入 console API
-        if (!consoleInjected) {
-            injectConsoleAPI(ctx, scope)
-            consoleInjected = true
-        }
+        // 每次创建新的 Context/Scope 时都注入 console API
+        // 因为每个 Context 都有独立的 Scope，之前注入的 console 不会在新 Scope 中
+        injectConsoleAPI(ctx, scope)
         
         return Pair(ctx, scope)
     }
@@ -175,7 +173,6 @@ class JSEngine {
             if (Context.getCurrentContext() != null) {
                 Context.exit()
             }
-            consoleInjected = false
             Log.d(TAG, "JavaScript 引擎已释放")
         } catch (e: Exception) {
             Log.e(TAG, "释放 JavaScript 引擎失败", e)

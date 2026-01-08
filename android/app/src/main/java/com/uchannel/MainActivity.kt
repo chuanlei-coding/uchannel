@@ -1,5 +1,6 @@
 package com.uchannel
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editCode: EditText
     private lateinit var txtResult: TextView
     private lateinit var btnExecute: Button
+    private lateinit var btnChat: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         editCode = findViewById(R.id.editCode)
         txtResult = findViewById(R.id.txtResult)
         btnExecute = findViewById(R.id.btnExecute)
+        btnChat = findViewById(R.id.btnChat)
 
         // 初始化 JavaScript 引擎
         jsEngine = JSEngine()
@@ -47,6 +50,13 @@ class MainActivity : AppCompatActivity() {
         // 设置执行按钮点击事件
         btnExecute.setOnClickListener {
             executeJavaScript()
+        }
+
+        // 设置聊天按钮点击事件
+        btnChat.setOnClickListener {
+            android.content.Intent(this, MainChatActivity::class.java).also { intent ->
+                startActivity(intent)
+            }
         }
 
         // 初始化Token管理器（可选，用于推送通知）

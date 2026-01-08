@@ -1,5 +1,11 @@
 server:
   port: 8080
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: changeit
+    key-store-type: PKCS12
+    key-alias: uchannel
   servlet:
     context-path: /
 
@@ -15,6 +21,12 @@ firebase:
   # Firebase数据库URL（可选）
   database-url: 
 
+# 通义千问配置
+qwen:
+  # 阿里云百炼API Key
+  # 默认使用已配置的API Key，可通过环境变量覆盖
+  api-key: sk-bbdf41fb73044d66b46976a1df35abbe
+
 # 日志配置
 logging:
   level:
@@ -22,4 +34,3 @@ logging:
     com.uchannel: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-
