@@ -1,16 +1,16 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
-
-react {
-    autolinkLibrariesWithApp()
-}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.uchannel"
+    
+    buildFeatures {
+        buildConfig true
+    }
+    
     defaultConfig {
         applicationId "com.uchannel"
         minSdkVersion rootProject.ext.minSdkVersion

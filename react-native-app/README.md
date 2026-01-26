@@ -79,3 +79,9 @@ yarn start
 - React Navigation 6.x
 - TypeScript
 - Axios (API 请求)
+
+## 文档
+
+- [Android Studio 调试指南](./ANDROID_STUDIO_DEBUG.md) - 详细说明如何在 Android Studio 中调试应用
+- [React Native 介绍](./REACT_NATIVE_INTRO.md) - React Native 技术介绍
+- [快速开始](./QUICK_START.md) - 快速开始指南
