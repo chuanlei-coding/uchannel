@@ -1,6 +1,17 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 
+// 设置 Node.js 路径供 React Native 构建脚本使用
+def nodeDir = "/opt/homebrew/opt/node@18/bin"
+def nodePath = "$nodeDir/node"
+if (!new File(nodePath).exists()) {
+    nodePath = "/usr/local/bin/node"
+}
+project.ext.set("NODE_BINARY", nodePath)
+
+// React Native 版本
+def reactNativeVersion = rootProject.ext.reactNativeVersion
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -9,6 +20,15 @@ android {
     
     buildFeatures {
         buildConfig true
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    
+    kotlinOptions {
+        jvmTarget = "17"
     }
     
     defaultConfig {
@@ -43,8 +63,9 @@ android {
 }
 
 dependencies {
-    implementation("com.facebook.react:react-android")
-    implementation("com.facebook.react:hermes-android")
+    // React Native - 指定版本
+    implementation("com.facebook.react:react-android:${reactNativeVersion}")
+    implementation("com.facebook.react:hermes-android:${reactNativeVersion}")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createStackNavigator, CardStyleInterpolators} from '@react-navigation/stack';
 import SplashScreen from '../screens/SplashScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ScheduleScreen from '../screens/ScheduleScreen';
@@ -11,7 +11,7 @@ export type RootStackParamList = {
   Schedule: undefined;
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
@@ -20,7 +20,7 @@ const AppNavigator = () => {
         initialRouteName="Splash"
         screenOptions={{
           headerShown: false,
-          animation: 'fade',
+          cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
         }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Main" component={ChatScreen} />

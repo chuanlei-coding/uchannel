@@ -6,6 +6,7 @@ buildscript {
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
         kotlinVersion = "1.9.20"
+        reactNativeVersion = "0.73.0"
     }
     repositories {
         google()
@@ -19,14 +20,54 @@ buildscript {
 
 allprojects {
     repositories {
+        // React Native 本地目录（用于兼容性）
         maven {
             url("$rootDir/../node_modules/react-native/android")
         }
+        // JSC Android
         maven {
             url("$rootDir/../node_modules/jsc-android/dist")
         }
-        google()
+        // Maven Central - React Native 0.71+ 的主要仓库
         mavenCentral()
+        google()
         maven { url 'https://www.jitpack.io' }
+    }
+    
+    // 依赖替换：将旧的 react-native 替换为新的 react-android
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            // 将 com.facebook.react:react-native 替换为 com.facebook.react:react-android
+            substitute module("com.facebook.react:react-native") using module("com.facebook.react:react-android:${rootProject.ext.reactNativeVersion}")
+        }
+        resolutionStrategy {
+            // 强制使用指定版本
+            force "com.facebook.react:react-android:${rootProject.ext.reactNativeVersion}"
+            force "com.facebook.react:hermes-android:${rootProject.ext.reactNativeVersion}"
+            // 强制使用兼容版本的 AndroidX
+            force "androidx.core:core:1.12.0"
+            force "androidx.core:core-ktx:1.12.0"
+        }
+    }
+    
+    // 为所有子项目启用 buildConfig 并设置 JVM 目标
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                buildFeatures {
+                    buildConfig true
+                }
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+        // 设置 Kotlin JVM 目标
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
     }
 }

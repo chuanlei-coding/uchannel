@@ -10,7 +10,7 @@
 # Specifies the JVM arguments used for the daemon process.
 # The setting is particularly useful for tweaking memory settings.
 # Default value: -Xmx512m -XX:MaxMetaspaceSize=256m
-org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
 
 # When configured, Gradle will run in incubating parallel mode.
 # This option should only be used with decoupled projects. More details, visit
@@ -43,9 +43,3 @@ hermesEnabled=true
 
 # 指定 Gradle 使用的 Java 版本（可选，让 Android Studio 自动选择）
 # org.gradle.java.home=/path/to/jdk
-
-# 配置 Node.js 路径（用于 React Native 构建）
-# 通过 org.gradle.jvmargs 设置环境变量（但这不直接支持 PATH）
-# 最佳方案：在 Android Studio 中配置环境变量
-# File → Settings → Build, Execution, Deployment → Build Tools → Gradle
-# 在 "Environment variables" 中添加：PATH=/opt/homebrew/opt/node@18/bin:$PATH

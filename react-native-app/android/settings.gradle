@@ -1,4 +1,22 @@
 rootProject.name = "uchannel"
+
+// 设置 Node.js 可执行文件路径 (用于 React Native 自动链接)
+def nodeDir = "/opt/homebrew/opt/node@18/bin"
+def nodePath = "$nodeDir/node"
+
+// 检查 node 是否存在于 homebrew 路径，如果不存在则尝试 /usr/local/bin
+if (!new File(nodePath).exists()) {
+    nodePath = "/usr/local/bin/node"
+}
+
+// 设置环境变量供 React Native 脚本使用
+System.setProperty("NODE_BINARY", nodePath)
+
+// 通过 ext 属性传递 node 路径
+gradle.ext.set("NODE_BINARY", nodePath)
+
 include ':app'
 
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+// 应用 React Native 的原生模块配置
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
