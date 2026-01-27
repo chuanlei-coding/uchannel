@@ -6,13 +6,19 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  Image,
+  StatusBar,
 } from 'react-native';
 import {Colors} from '../utils/colors';
 import {Message, MessageSender} from '../models/Message';
 import MessageItem from '../components/MessageItem';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import type {RootStackParamList} from '../navigation/AppNavigator';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ChatScreen = () => {
+  const navigation = useNavigation<NavigationProp>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
@@ -76,26 +82,27 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.charcoal} />
+      
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.menuIcon}>☰</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Vita</Text>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Text style={styles.searchIcon}>🔍</Text>
-          </TouchableOpacity>
-          <View style={styles.avatar} />
+        <View style={styles.headerLeft}>
+          <View style={styles.logoIcon}>
+            <View style={styles.logoLeaf} />
+          </View>
+          <Text style={styles.headerTitle}>Vita Assistant</Text>
         </View>
+        <TouchableOpacity style={styles.moreButton}>
+          <Text style={styles.moreIcon}>⋯</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Date Label */}
       <Text style={styles.dateLabel}>
-        {new Date().toLocaleDateString('zh-CN', {
-          month: 'long',
+        今天, {new Date().toLocaleDateString('zh-CN', {
+          month: 'numeric',
           day: 'numeric',
-        })}
+        }).replace('/', '月')}日
       </Text>
 
       {/* Messages */}
@@ -115,14 +122,34 @@ const ChatScreen = () => {
         </TouchableOpacity>
         <TextInput
           style={styles.input}
-          placeholder="与 Vita 对话…"
-          placeholderTextColor={Colors.textWhite40}
+          placeholder="与 Vita 交流..."
+          placeholderTextColor={Colors.textWhite20}
           value={inputText}
           onChangeText={setInputText}
           multiline
         />
-        <TouchableOpacity style={styles.micButton} onPress={sendMessage}>
-          <Text style={styles.micIcon}>🎤</Text>
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+          <Text style={styles.sendIcon}>↑</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Schedule')}>
+          <Text style={styles.navIcon}>📅</Text>
+          <Text style={styles.navText}>日程</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>📊</Text>
+          <Text style={styles.navText}>洞察</Text>
+        </TouchableOpacity>
+        <View style={styles.navItem}>
+          <Text style={styles.navIconActive}>💬</Text>
+          <Text style={styles.navTextActive}>AI 助手</Text>
+        </View>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Settings')}>
+          <Text style={styles.navIcon}>⚙️</Text>
+          <Text style={styles.navText}>设置</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -138,86 +165,88 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: Colors.darkSage,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
-  menuIcon: {
-    fontSize: 24,
-    color: Colors.textPrimary,
-  },
-  headerTitle: {
-    fontSize: 18,
-    color: Colors.textPrimary,
-    fontFamily: 'serif',
-  },
-  headerRight: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  headerButton: {
-    width: 40,
-    height: 40,
+  logoIcon: {
+    width: 32,
+    height: 32,
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchIcon: {
-    fontSize: 20,
-    color: Colors.textPrimary,
+  logoLeaf: {
+    width: 20,
+    height: 20,
+    backgroundColor: Colors.brandSage,
+    opacity: 0.8,
+    borderRadius: 10,
+    transform: [{rotate: '-15deg'}],
   },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.brandTeal,
-    marginLeft: 8,
+  headerTitle: {
+    fontSize: 20,
+    color: Colors.onSurface,
+    fontWeight: '500',
+  },
+  moreButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.glassGrey,
+    borderWidth: 1,
+    borderColor: Colors.textWhite05,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moreIcon: {
+    fontSize: 20,
+    color: Colors.brandSage,
   },
   dateLabel: {
     textAlign: 'center',
     color: Colors.textWhite30,
     fontSize: 10,
-    letterSpacing: 0.02,
+    letterSpacing: 2,
     marginTop: 16,
     textTransform: 'uppercase',
   },
   messagesContainer: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: 24,
+    paddingBottom: 180,
   },
   inputContainer: {
     position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
+    bottom: 84,
+    left: 24,
+    right: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.inputBarDarkGreen,
-    marginHorizontal: 24,
-    marginBottom: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    backgroundColor: Colors.glassGrey,
+    borderWidth: 1,
+    borderColor: Colors.textWhite05,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 24,
   },
   addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.brandSage,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
   },
   addIcon: {
-    fontSize: 20,
-    color: Colors.charcoal,
+    fontSize: 24,
+    color: Colors.textWhite40,
   },
   input: {
     flex: 1,
-    color: Colors.textPrimary,
+    color: Colors.onSurface,
     fontSize: 15,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     maxHeight: 100,
   },
-  micButton: {
+  sendButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -225,9 +254,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  micIcon: {
+  sendIcon: {
     fontSize: 18,
     color: Colors.charcoal,
+    fontWeight: 'bold',
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 84,
+    backgroundColor: 'rgba(26,31,29,0.85)',
+    borderTopWidth: 1,
+    borderTopColor: Colors.textWhite05,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-around',
+    paddingTop: 12,
+    paddingHorizontal: 24,
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navIcon: {
+    fontSize: 24,
+    opacity: 0.4,
+  },
+  navIconActive: {
+    fontSize: 24,
+  },
+  navText: {
+    fontSize: 10,
+    color: Colors.textWhite40,
+    marginTop: 4,
+  },
+  navTextActive: {
+    fontSize: 10,
+    color: Colors.brandSage,
+    marginTop: 4,
+    fontWeight: '500',
   },
 });
 

@@ -4,11 +4,13 @@ import {createStackNavigator, CardStyleInterpolators} from '@react-navigation/st
 import SplashScreen from '../screens/SplashScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ScheduleScreen from '../screens/ScheduleScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
   Main: undefined;
   Schedule: undefined;
+  Settings: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -25,6 +27,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Main" component={ChatScreen} />
         <Stack.Screen name="Schedule" component={ScheduleScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
