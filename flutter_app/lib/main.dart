@@ -5,7 +5,10 @@ import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/schedule_screen.dart';
+import 'screens/discover_screen.dart';
+import 'screens/stats_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/add_todo_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +17,9 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF142111),
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFFFDFBF7),
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
@@ -58,6 +61,26 @@ final GoRouter _router = GoRouter(
       ),
     ),
     GoRoute(
+      path: '/discover',
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const DiscoverScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ),
+    GoRoute(
+      path: '/stats',
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const StatsScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ),
+    GoRoute(
       path: '/settings',
       pageBuilder: (context, state) => CustomTransitionPage(
         key: state.pageKey,
@@ -73,6 +96,16 @@ final GoRouter _router = GoRouter(
         },
       ),
     ),
+    GoRoute(
+      path: '/add-todo',
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const AddTodoScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ),
   ],
 );
 
@@ -85,7 +118,7 @@ class VitaApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Vita',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       routerConfig: _router,
     );
   }

@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
 
-/// Vita 应用主题颜色
+/// Vita 应用主题颜色 - 柔和版
 class AppColors {
   AppColors._();
 
   // 主色调
-  static const Color primary = Color(0xFF40DF20);
   static const Color brandSage = Color(0xFF9DC695);
-  static const Color brandTeal = Color(0xFF5A8A83);
+  static const Color brandTeal = Color(0xFF7DA89E);
+  static const Color terracotta = Color(0xFFD48C70);
+  static const Color softGold = Color(0xFFD9BC8C);
+  static const Color dustyRose = Color(0xFFD6A5A5);
+  static const Color accentGreen = Color(0xFF86A789);
 
   // 背景色
-  static const Color backgroundDark = Color(0xFF142111);
-  static const Color charcoal = Color(0xFF1A1F1D);
-  static const Color charcoalDark = Color(0xFF1A241B);
-  static const Color surfaceContainer = Color(0xFF1D211F);
-  static const Color slateGrey = Color(0xFF2C3430);
-  static const Color darkSage = Color(0xFF2C3430);
+  static const Color creamBg = Color(0xFFFDFBF7);
+  static const Color warmCream = Color(0xFFFDFAF5);
+  static const Color softIvory = Color(0xFFFFFFFF);
+  static const Color softAmber = Color(0xFFF9F1E6);
+  static const Color softSage = Color(0xFFEDF4EB);
+  static const Color sand = Color(0xFFE8E1D5);
 
   // 文字颜色
-  static const Color onSurface = Color(0xFFE1E3DF);
-  static const Color onSurfaceVariant = Color(0xFFBFC9C2);
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = brandSage;
+  static const Color darkGrey = Color(0xFF3A3A3A);
+  static const Color darkGreyAlt = Color(0xFF3A3D3C);
+  static const Color softGrey = Color(0xFF7D8280);
+  static const Color mutedGrey = Color(0xFF8E8E93);
+  static const Color warmGrey = Color(0xFF8C867E);
+  static const Color vitaBlack = Color(0xFF3C3C3C);
 
-  // 透明色
-  static const Color white90 = Color(0xE6FFFFFF);
-  static const Color white80 = Color(0xCCFFFFFF);
-  static const Color white70 = Color(0xB3FFFFFF);
-  static const Color white60 = Color(0x99FFFFFF);
-  static const Color white40 = Color(0x66FFFFFF);
-  static const Color white30 = Color(0x4DFFFFFF);
-  static const Color white20 = Color(0x33FFFFFF);
-  static const Color white10 = Color(0x1AFFFFFF);
-  static const Color white05 = Color(0x0DFFFFFF);
+  // 边框和分割线
+  static const Color borderLight = Color(0xFFEBE8E1);
+  static const Color borderLightAlt = Color(0xFFF0EBE5);
 
-  // 玻璃效果
-  static const Color glassSage = Color(0x269DC695);
-  static const Color glassGrey = Color(0x0DFFFFFF);
+  // 按钮颜色
+  static const Color buttonSage = Color(0xFFA5C29D);
 
-  // 气泡颜色
-  static const Color bubbleUserGreen = Color(0x809DC695);
-  static const Color bubbleAssistantSage = Color(0x269DC695);
+  // 图表颜色
+  static const Color sageGreen = Color(0xFF8BA888);
+  static const Color softTerracotta = Color(0xFFD98E73);
+
+  // 热力图颜色
+  static const Color heatmapLight = Color(0xFFF3F1E8);
+  static const Color heatmap1 = Color(0xFFE6EBC5);
+  static const Color heatmap2 = Color(0xFFD9E3A5);
+  static const Color heatmap3 = Color(0xFFCFD985);
+  static const Color heatmap4 = Color(0xFF8BA888);
 
   // 危险色
-  static const Color danger = Color(0xFFF87171);
+  static const Color danger = Color(0xFFFF6B6B);
 }

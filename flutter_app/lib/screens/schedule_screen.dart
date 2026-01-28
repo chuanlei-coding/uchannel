@@ -75,7 +75,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.charcoal,
+      backgroundColor: AppColors.creamBg,
       body: Stack(
         children: [
           // 背景装饰
@@ -178,7 +178,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 onPressed: () {},
                 icon: const Icon(
                   Icons.search,
-                  color: AppColors.onSurface,
+                  color: AppColors.darkGrey,
                 ),
               ),
               Container(
@@ -210,7 +210,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: AppColors.white05,
+            color: AppColors.darkGrey.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -218,7 +218,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       child: TabBar(
         controller: _tabController,
         labelColor: AppColors.brandSage,
-        unselectedLabelColor: AppColors.onSurfaceVariant,
+        unselectedLabelColor: AppColors.softGrey,
         labelStyle: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -242,7 +242,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
             style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w300,
-              color: AppColors.onSurface,
+              color: AppColors.darkGrey,
             ),
           ),
           const SizedBox(height: 4),
@@ -250,7 +250,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
             '星期${_getWeekday(now.weekday)} · 岁序更替，步履轻盈',
             style: const TextStyle(
               fontSize: 14,
-              color: AppColors.onSurfaceVariant,
+              color: AppColors.softGrey,
             ),
           ),
         ],
@@ -266,7 +266,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   Widget _buildFloatingButton() {
     return GestureDetector(
       onTap: () {
-        // TODO: 添加新任务
+        context.push('/add-todo');
       },
       child: Container(
         width: 56,
@@ -285,7 +285,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         child: const Icon(
           Icons.add,
           size: 30,
-          color: AppColors.charcoal,
+          color: AppColors.darkGrey,
         ),
       ),
     );
@@ -295,10 +295,10 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     return Container(
       height: 64,
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
+        color: AppColors.softIvory,
         border: Border(
           top: BorderSide(
-            color: AppColors.white05,
+            color: AppColors.darkGrey.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -333,14 +333,14 @@ class _ScheduleScreenState extends State<ScheduleScreen>
           Icon(
             icon,
             size: 24,
-            color: isActive ? AppColors.brandSage : AppColors.onSurfaceVariant,
+            color: isActive ? AppColors.brandSage : AppColors.softGrey,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 10,
-              color: isActive ? AppColors.brandSage : AppColors.onSurfaceVariant,
+              color: isActive ? AppColors.brandSage : AppColors.softGrey,
             ),
           ),
         ],

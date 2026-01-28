@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../theme/colors.dart';
 
-/// 消息项组件
+/// 消息项组件 - 柔和版
 class MessageItem extends StatelessWidget {
   final Message message;
 
@@ -20,7 +20,7 @@ class MessageItem extends StatelessWidget {
     }
   }
 
-  /// 用户消息
+  /// 用户消息 - 陶土色
   Widget _buildUserMessage() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16, left: 50),
@@ -30,23 +30,31 @@ class MessageItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.glassGrey,
+              color: AppColors.terracotta,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(0),
               ),
-              border: Border.all(
-                color: AppColors.white10,
-                width: 1,
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.terracotta.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Text(
               message.content,
               style: const TextStyle(
                 fontSize: 15,
-                color: AppColors.white90,
+                color: Colors.white,
                 height: 1.5,
               ),
             ),
@@ -54,9 +62,9 @@ class MessageItem extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             _formatTime(message.timestamp),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.white20,
+              color: AppColors.softGrey.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -64,7 +72,7 @@ class MessageItem extends StatelessWidget {
     );
   }
 
-  /// 助手消息
+  /// 助手消息 - 白色气泡
   Widget _buildAssistantMessage() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16, right: 50),
@@ -74,7 +82,7 @@ class MessageItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.glassSage,
+              color: Colors.white,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -82,9 +90,21 @@ class MessageItem extends StatelessWidget {
                 bottomRight: Radius.circular(16),
               ),
               border: Border.all(
-                color: AppColors.brandSage.withValues(alpha: 0.1),
+                color: AppColors.borderLightAlt.withValues(alpha: 0.5),
                 width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.terracotta.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +115,8 @@ class MessageItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontStyle: FontStyle.italic,
-                      color: AppColors.brandSage.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.accentGreen,
                       height: 1.5,
                     ),
                   ),
@@ -103,9 +124,9 @@ class MessageItem extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     message.contentSecondary!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.white80,
+                      color: AppColors.darkGrey.withValues(alpha: 0.9),
                       height: 1.5,
                     ),
                   ),
@@ -116,9 +137,9 @@ class MessageItem extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             _formatTime(message.timestamp),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.white20,
+              color: AppColors.softGrey.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -133,7 +154,7 @@ class MessageItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.glassSage,
+          color: Colors.white,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(16),
             topRight: Radius.circular(16),
@@ -141,9 +162,16 @@ class MessageItem extends StatelessWidget {
             bottomRight: Radius.circular(16),
           ),
           border: Border.all(
-            color: AppColors.brandSage.withValues(alpha: 0.1),
+            color: AppColors.borderLightAlt.withValues(alpha: 0.5),
             width: 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.terracotta.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,16 +182,16 @@ class MessageItem extends StatelessWidget {
                 Icon(
                   Icons.auto_awesome,
                   size: 16,
-                  color: AppColors.brandSage,
+                  color: AppColors.terracotta,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '建议操作',
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 2,
-                    color: AppColors.brandSage.withValues(alpha: 0.6),
+                    color: AppColors.terracotta.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -175,10 +203,10 @@ class MessageItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.charcoal.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.creamBg.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.white05,
+                    color: AppColors.brandSage.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -192,15 +220,16 @@ class MessageItem extends StatelessWidget {
                           message.scheduleTitle!,
                           style: const TextStyle(
                             fontSize: 14,
-                            color: AppColors.white90,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.darkGrey,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           message.scheduleTime ?? '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.white40,
+                            color: AppColors.softGrey,
                           ),
                         ),
                       ],
@@ -219,9 +248,9 @@ class MessageItem extends StatelessWidget {
             // 内容
             Text(
               message.content,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.white70,
+                color: AppColors.darkGrey.withValues(alpha: 0.8),
                 height: 1.5,
               ),
             ),

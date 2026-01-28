@@ -16,7 +16,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.creamBg,
       body: Stack(
         children: [
           // 背景装饰
@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               icon: Icons.cloud_sync_outlined,
                               title: '云同步状态',
                               value: '已更新',
-                              valueColor: AppColors.primary,
+                              valueColor: AppColors.brandSage,
                             ),
                             _buildSettingItem(
                               icon: Icons.logout,
@@ -193,7 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w500,
-                color: AppColors.onSurface,
+                color: AppColors.darkGrey,
               ),
             ),
           ),
@@ -221,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: AppColors.brandSage.withValues(alpha: 0.3),
                   width: 2,
                 ),
-                color: AppColors.slateGrey.withValues(alpha: 0.5),
+                color: AppColors.softGrey.withValues(alpha: 0.5),
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -242,7 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
-                      color: AppColors.backgroundDark,
+                      color: AppColors.creamBg,
                     ),
                   ),
                 ),
@@ -255,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.brandSage,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -268,7 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: const Icon(
                   Icons.edit,
                   size: 14,
-                  color: AppColors.backgroundDark,
+                  color: AppColors.creamBg,
                 ),
               ),
             ),
@@ -283,7 +283,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(
             fontSize: 26,
             fontStyle: FontStyle.italic,
-            color: AppColors.onSurface,
+            color: AppColors.darkGrey,
           ),
         ),
 
@@ -321,10 +321,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.charcoalDark.withValues(alpha: 0.5),
+            color: AppColors.darkGrey.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.white05,
+              color: AppColors.darkGrey.withValues(alpha: 0.05),
               width: 1,
             ),
           ),
@@ -352,7 +352,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         border: showBorder
             ? Border(
                 bottom: BorderSide(
-                  color: AppColors.white05,
+                  color: AppColors.darkGrey.withValues(alpha: 0.05),
                   width: 1,
                 ),
               )
@@ -371,7 +371,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title,
               style: TextStyle(
                 fontSize: 17,
-                color: isDanger ? AppColors.danger : AppColors.onSurface,
+                color: isDanger ? AppColors.danger : AppColors.darkGrey,
               ),
             ),
           ),
@@ -395,7 +395,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: AppColors.white20,
+                color: AppColors.darkGrey.withValues(alpha: 0.2),
               ),
             ],
           ],
@@ -440,10 +440,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       height: 80,
       decoration: BoxDecoration(
-        color: AppColors.backgroundDark.withValues(alpha: 0.8),
+        color: AppColors.creamBg.withValues(alpha: 0.8),
         border: Border(
           top: BorderSide(
-            color: AppColors.white05,
+            color: AppColors.darkGrey.withValues(alpha: 0.05),
             width: 1,
           ),
         ),

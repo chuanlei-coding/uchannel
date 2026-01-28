@@ -91,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.charcoal,
+      backgroundColor: AppColors.creamBg,
       body: Stack(
         children: [
           // 背景装饰
@@ -126,7 +126,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 _buildInputBar(),
 
                 // 底部导航
-                _buildBottomNav(),
+                _buildBottomNav(context),
               ],
             ),
           ),
@@ -178,11 +178,11 @@ class _ChatScreenState extends State<ChatScreen> {
               const SizedBox(width: 12),
               const Text(
                 'Vita Assistant',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.5,
-                  color: AppColors.textPrimary,
+                  color: AppColors.darkGrey,
                 ),
               ),
             ],
@@ -192,15 +192,22 @@ class _ChatScreenState extends State<ChatScreen> {
             height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.glassGrey,
+              color: Colors.white,
               border: Border.all(
-                color: AppColors.white05,
+                color: AppColors.borderLightAlt,
                 width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.more_horiz,
-              color: AppColors.brandSage,
+              color: AppColors.softGrey,
             ),
           ),
         ],
@@ -219,7 +226,7 @@ class _ChatScreenState extends State<ChatScreen> {
               angle: -0.26,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.brandSage.withValues(alpha: 0.8),
+                  color: AppColors.brandSage.withValues(alpha: 0.6),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(12),
                     bottomRight: Radius.circular(12),
@@ -260,15 +267,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildDateLabel() {
     final now = DateTime.now();
+    final weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
-        '今天, ${now.month}月${now.day}日',
-        style: const TextStyle(
+        '${now.month}月${now.day}日 · ${weekdays[now.weekday - 1]}',
+        style: TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           letterSpacing: 3,
-          color: AppColors.white30,
+          color: AppColors.softGrey.withValues(alpha: 0.6),
         ),
       ),
     );
@@ -279,20 +287,32 @@ class _ChatScreenState extends State<ChatScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.glassGrey,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: AppColors.white10,
+          color: AppColors.borderLightAlt.withValues(alpha: 0.5),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.terracotta.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Icons.add_circle_outline,
-              color: AppColors.white40,
+            icon: Icon(
+              Icons.add_circle,
+              color: AppColors.softGrey.withValues(alpha: 0.6),
             ),
           ),
           Expanded(
@@ -300,15 +320,15 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: _inputController,
               style: const TextStyle(
                 fontSize: 15,
-                color: AppColors.textPrimary,
+                color: AppColors.darkGrey,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '与 Vita 交流...',
                 hintStyle: TextStyle(
-                  color: AppColors.white20,
+                  color: AppColors.softGrey.withValues(alpha: 0.4),
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               ),
               onSubmitted: (_) => _sendMessage(),
             ),
@@ -316,16 +336,23 @@ class _ChatScreenState extends State<ChatScreen> {
           GestureDetector(
             onTap: _sendMessage,
             child: Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.brandSage,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.arrow_upward,
                 size: 18,
-                color: AppColors.charcoal,
+                color: Colors.white,
               ),
             ),
           ),
@@ -334,29 +361,34 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(BuildContext context) {
     return Container(
       height: 84,
       decoration: BoxDecoration(
-        color: AppColors.charcoal.withValues(alpha: 0.85),
+        color: AppColors.creamBg.withValues(alpha: 0.8),
         border: Border(
           top: BorderSide(
-            color: AppColors.white05,
-            width: 1,
+            color: AppColors.darkGrey.withValues(alpha: 0.05),
+            width: 0.5,
           ),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.home_outlined, '概览', false, () {}),
-          _buildNavItem(Icons.calendar_month_outlined, '日程', false, () {
+          _buildNavItem(Icons.chat_bubble, '助手', true, () {}, context),
+          _buildNavItem(Icons.calendar_today, '日程', false, () {
             context.go('/schedule');
-          }),
-          _buildNavItem(Icons.chat_bubble, '助手', true, () {}),
-          _buildNavItem(Icons.settings_outlined, '设置', false, () {
+          }, context),
+          _buildNavItem(Icons.explore, '发现', false, () {
+            context.go('/discover');
+          }, context),
+          _buildNavItem(Icons.bar_chart, '统计', false, () {
+            context.go('/stats');
+          }, context),
+          _buildNavItem(Icons.settings, '设置', false, () {
             context.go('/settings');
-          }),
+          }, context),
         ],
       ),
     );
@@ -367,6 +399,7 @@ class _ChatScreenState extends State<ChatScreen> {
     String label,
     bool isActive,
     VoidCallback onTap,
+    BuildContext context,
   ) {
     return GestureDetector(
       onTap: onTap,
@@ -376,15 +409,19 @@ class _ChatScreenState extends State<ChatScreen> {
           Icon(
             icon,
             size: 24,
-            color: isActive ? AppColors.brandSage : AppColors.white40,
+            color: isActive
+                ? AppColors.brandSage
+                : AppColors.softGrey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 10,
-              fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
-              color: isActive ? AppColors.brandSage : AppColors.white40,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color: isActive
+                  ? AppColors.brandSage
+                  : AppColors.softGrey.withValues(alpha: 0.5),
             ),
           ),
         ],

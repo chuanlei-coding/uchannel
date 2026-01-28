@@ -35,10 +35,10 @@ class TaskCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
+        color: AppColors.softIvory,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppColors.white05,
+          color: AppColors.darkGrey.withValues(alpha: 0.05),
           width: 1,
         ),
         boxShadow: [
@@ -76,7 +76,7 @@ class TaskCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.onSurface,
+                        color: AppColors.darkGrey,
                       ),
                     ),
                   ],
@@ -97,7 +97,7 @@ class TaskCard extends StatelessWidget {
               task.description!,
               style: const TextStyle(
                 fontSize: 14,
-                color: AppColors.onSurfaceVariant,
+                color: AppColors.softGrey,
                 height: 1.5,
               ),
             ),
@@ -114,14 +114,14 @@ class TaskCard extends StatelessWidget {
                   Icon(
                     Icons.access_time,
                     size: 16,
-                    color: AppColors.onSurfaceVariant,
+                    color: AppColors.softGrey,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     task.time,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: AppColors.onSurfaceVariant,
+                      color: AppColors.softGrey,
                     ),
                   ),
                 ],

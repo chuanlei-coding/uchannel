@@ -22,6 +22,16 @@ local.properties
 *.tar.gz
 *.rar
 
+# Flutter
+flutter_app/.dart_tool/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/.packages
+flutter_app/build/
+flutter_app/.metadata
+flutter_app/*.iml
+flutter_app/pubspec.lock
+
 # Firebase密钥（重要！不要提交）
 **/serviceAccountKey.json
 **/google-services.json
@@ -47,3 +57,7 @@ Thumbs.db
 logs/
 *.log
 
+# Node (如有残留)
+node_modules/
+npm-debug.log
+yarn-error.log

@@ -1,314 +1,210 @@
-# Android 推送消息实现方案
+# UChannel - Vita 智能助手
 
-本项目提供了完整的服务器向Android应用推送消息的实现方案。
+Vita 是一个优雅的个人效率管理应用，帮助你更好地规划和实现目标。
 
-## 📁 项目结构
+## 项目架构
 
 ```
 uchannel/
-├── docs/
-│   └── push-notification-architecture.md  # 架构设计文档
-├── backend-java/                           # Java后端实现（Spring Boot）
-│   ├── src/main/java/com/uchannel/
-│   │   ├── PushNotificationApplication.java
-│   │   ├── config/FirebaseConfig.java
-│   │   ├── controller/PushController.java
-│   │   ├── service/PushNotificationService.java
-│   │   └── dto/                            # 数据传输对象
-│   └── pom.xml                             # Maven配置
-└── android/
-    ├── PushNotificationService.kt          # Android推送服务
-    ├── FCMTokenManager.kt                  # Token管理器
-    └── AndroidManifest.xml                 # 配置文件示例
+├── flutter_app/              # Flutter 前端应用
+├── backend-java/             # Java Spring Boot 后端
+├── docs/                   # 后端相关文档
+├── scripts/                 # 后端构建和启动脚本
+└── README.md              # 项目说明
 ```
 
-## 🚀 快速开始
+## 功能特性
 
-### 0. 一键构建（推荐）
+### Flutter 应用
 
-使用提供的构建脚本同时生成APK和后端JAR包：
+- **启动页** - 优雅的品牌展示
+- **助手页** - AI 智能对话助手
+- **日程页** - 任务管理，支持智能拆解
+- **发现页** - 内容探索
+- **统计页** - 数据洞察
+- **设置页** - 个性化配置
 
-**Linux/Mac:**
+### 后端服务
+
+- **聊天服务** - 支持 AI 对话
+- **推送通知** - Firebase 消息推送
+- **消息存储** - 历史消息持久化
+
+## 快速开始
+
+### Flutter App
+
+**环境要求：**
+- Flutter 3.10+
+- Dart 3.0+
+- Android Studio / Xcode
+
+**构建应用：**
+
 ```bash
-./scripts/build.sh
+# 进入 Flutter 项目
+cd flutter_app
+
+# Debug 版本
+flutter build apk --debug
+
+# Release 版本
+flutter build apk --release
+
+# 在设备上运行
+flutter run
 ```
 
-**Windows:**
-```cmd
-scripts\build.bat
-```
+**APK 输出位置：**
+- Debug: `build/app/outputs/flutter-apk/app-debug.apk`
+- Release: `build/app/outputs/flutter-apk/app-release.apk`
 
-构建完成后，所有文件将输出到 `build/` 目录：
-- `build/apk/` - Android APK文件
-- `build/jar/` - 后端JAR包
-- `build/scripts/` - 启动脚本
-
-详细说明请参考：[scripts/README.md](scripts/README.md)
-
-### 1. 服务器端设置
+### 后端服务
 
 **环境要求：**
 - JDK 17+
 - Maven 3.6+
 
-**安装和运行：**
+**启动服务：**
 
 ```bash
+# 使用脚本启动（推荐）
+./scripts/start-backend.sh
+
+# 或手动启动
 cd backend-java
-
-# 编译项目
-mvn clean compile
-
-# 运行应用
 mvn spring-boot:run
 ```
 
-**配置Firebase：**
-1. 访问 [Firebase Console](https://console.firebase.google.com/)
-2. 创建新项目或选择现有项目
-3. 进入"项目设置" > "服务账号"
-4. 点击"生成新的私钥"，下载 `serviceAccountKey.json`
-5. 将文件放在 `backend-java/src/main/resources/` 目录下
+服务默认运行在 `http://localhost:8080`
 
-详细文档请参考：[backend-java/README.md](backend-java/README.md)
+## 文档
 
-### 2. Android端设置
+### 后端相关
 
-#### 添加依赖
+- [国内部署指南](docs/china-deployment-guide.md) - Firebase 在国内的替代方案
+- [推送架构对比](docs/push-architecture-comparison.md) - FCM 与极光推送对比
+- [多平台推送架构](docs/multi-platform-push-architecture.md) - Android + iOS 统一推送
+- [推送通知架构](docs/push-notification-architecture.md) - 完整推送系统设计
+- [WebSocket 推送难点](docs/websocket-push-challenges.md) - 自建推送的 7 大难点
 
-在 `app/build.gradle` 中添加：
+### 后端配置
 
-```gradle
-dependencies {
-    implementation 'com.google.firebase:firebase-messaging:23.4.0'
-    implementation 'com.google.firebase:firebase-analytics:21.5.0'
-}
-```
+- `backend-java/QWEN_CONFIG.md` - Qwen AI 配置说明
 
-#### 添加google-services.json
+## 项目特性
 
-1. 在Firebase Console中，进入项目设置
-2. 添加Android应用，输入包名
-3. 下载 `google-services.json`
-4. 将文件放在 `app/` 目录下
+### UI/UX 设计
 
-#### 在Application中初始化
+基于 **Vita** 品牌理念，采用柔和优雅的设计风格：
 
-```kotlin
-class MyApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        
-        // 获取并注册FCM Token
-        val tokenManager = FCMTokenManager(this)
-        tokenManager.getToken { token ->
-            if (token != null) {
-                // Token已获取，可以发送到服务器
-                Log.d("App", "FCM Token: $token")
-            }
-        }
-    }
-}
-```
+- **配色方案** - 鼠尾草绿、水鸭青色为主
+- **字体** - Newsreader（衬线）+ 系统字体
+- **圆角** - 大圆角，柔和感
+- **阴影** - 轻阴影，层次感
 
-## 📖 使用示例
+### 技术栈
 
-### Java后端发送推送
+**前端：**
+- Flutter 3.10+
+- Dart 3.0+
+- Google Fonts
+- go_router（导航）
 
-```java
-@Autowired
-private PushNotificationService pushNotificationService;
+**后端：**
+- Java 17
+- Spring Boot
+- H2 Database
+- Firebase Cloud Messaging
 
-// 发送给单个设备
-PushResult result = pushNotificationService.sendToDevice(
-    "user_fcm_token",
-    "新消息",
-    "您有一条新消息",
-    Map.of("type", "message", "id", "123"),
-    "high"
-);
+## 开发指南
 
-// 批量发送
-List<String> tokens = Arrays.asList("token1", "token2", "token3");
-PushResult batchResult = pushNotificationService.sendToMultipleDevices(
-    tokens,
-    "系统通知",
-    "系统维护通知",
-    Map.of("type", "system")
-);
-
-// 主题推送
-PushResult topicResult = pushNotificationService.sendToTopic(
-    "news",
-    "新闻推送",
-    "今日头条新闻",
-    Map.of("articleId", "456")
-);
-```
-
-### API调用示例
+### Flutter 开发
 
 ```bash
-# 发送推送（默认端口8080）
-curl -X POST http://localhost:8080/api/push/send?userId=user123 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "新消息",
-    "body": "您有一条新消息",
-    "data": {"type": "message", "id": "123"}
-  }'
+# 安装依赖
+flutter pub get
 
-# 广播推送
-curl -X POST http://localhost:8080/api/push/broadcast \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userIds": ["user1", "user2"],
-    "title": "系统通知",
-    "body": "系统维护通知"
-  }'
+# 运行分析
+flutter analyze
 
-# 注册Token
-curl -X POST http://localhost:8080/api/push/register-token \
-  -H "Content-Type: application/json" \
-  -d '{
-    "token": "fcm_token_here"
-  }'
+# 运行测试
+flutter test
+
+# 查看所有可用设备
+flutter devices
+
+# 热重载（开发时）
+# 在 IDE 中按 'r' 键
+# 或在命令行使用 flutter run
 ```
 
-## 🔧 配置说明
+### 后端开发
 
-### 消息优先级
+```bash
+# 编译项目
+mvn clean compile
 
-- `high`: 即时消息，立即推送
-- `normal`: 普通消息，可延迟
+# 运行测试
+mvn test
 
-### 通知渠道（Android 8.0+）
+# 打包 JAR
+mvn package
+```
 
-需要在Android端创建通知渠道，服务器推送时指定 `channelId`。
+## 脚本说明
 
-### Token管理
+### 后端脚本
 
-- Token会在以下情况刷新：
-  - 应用重新安装
-  - 应用数据被清除
-  - 应用恢复出厂设置
-  - Token过期（很少发生）
+| 脚本 | 说明 |
+|------|------|
+| `build-backend.sh` | 构建后端 JAR 包 |
+| `start-backend.sh` | 启动后端服务（Linux/Mac） |
+| `start-backend.bat` | 启动后端服务（Windows） |
+| `generate-ssl-cert.sh` | 生成 SSL 证书 |
 
-- 需要在 `onNewToken` 回调中及时更新服务器端的Token
+详细说明：[scripts/README.md](scripts/README.md)
 
-## 🛡️ 安全建议
+## 构建产物
 
-1. **保护服务账号密钥**
-   - 不要将 `serviceAccountKey.json` 提交到代码仓库
-   - 使用环境变量或密钥管理服务
+### Flutter App
 
-2. **Token验证**
-   - 服务器端验证Token的有效性
-   - 定期清理无效Token
+```
+flutter_app/build/app/outputs/flutter-apk/
+├── app-debug.apk          # Debug 版本
+└── app-release.apk        # Release 版本
+```
 
-3. **API认证**
-   - 推送API需要身份验证
-   - 限制推送权限
+### 后端
 
-## 📊 监控和统计
+```
+backend-java/target/
+├── *.jar                 # Spring Boot 可执行 JAR
+└── *.original             # 原始打包文件
+```
 
-建议实现以下监控指标：
+## 清理历史
 
-- 推送成功率
-- 推送失败原因统计
-- Token有效性统计
-- 用户打开率
+项目已于 **2026-01-27** 从 React Native 重构为 Flutter。以下是已删除的过期内容：
 
-## 🔄 国内部署说明 ⚠️
+**已删除的文档（React Native 时代）：**
+- Android 原生聊天界面文档
+- Android UI 设计指南
+- 聊天历史功能文档
+- 主页重新设计文档
+- UI 美化文档
+- UI/UX 优化文档
 
-**重要提示：FCM在中国大陆无法直接访问！**
+**已删除的脚本（Android 原生）：**
+- Android APK 构建脚本
+- 完整构建脚本
 
-由于网络限制，Google Firebase Cloud Messaging (FCM) 在中国大陆无法正常使用。如果您的应用主要面向国内用户，**强烈建议使用国内推送服务**。
+详细的清理说明：[CLEANUP_NOTES.md](CLEANUP_NOTES.md)
 
-### 推荐方案
-
-1. **极光推送（JPush）** ⭐ 最推荐
-   - 国内市场份额最大（>70%）
-   - 免费版：100万推送/月
-   - 支持厂商通道，送达率>90%
-   - [官网](https://www.jiguang.cn/)
-
-2. **个推（Getui）**
-   - 企业级推送服务
-   - 高送达率（>95%）
-   - 专业客服支持
-   - [官网](https://www.getui.com/)
-
-3. **厂商推送**
-   - 华为推送（HMS Push）
-   - 小米推送（MiPush）
-   - OPPO推送、VIVO推送
-   - 各厂商设备送达率接近100%
-
-### 详细指南
-
-请参考：[国内部署指南](docs/china-deployment-guide.md)
-
-该文档包含：
-- 完整的国内推送服务集成方案
-- 从FCM迁移到国内推送的步骤
-- 双通道方案（同时支持国内外用户）
-- 性能对比和最佳实践
-
-### WebSocket自建推送
-
-如果您考虑使用WebSocket自建推送能力，请参考：[WebSocket自建推送技术难点分析](docs/websocket-push-challenges.md)
-
-该文档详细分析了：
-- 7大核心难点（连接管理、消息路由、高可用、性能优化等）
-- 每个难点的技术挑战和解决方案
-- 代码示例和最佳实践
-- 成本分析和适用场景
-
-### 架构对比分析
-
-深入了解FCM和极光推送的内部架构设计，请参考：[FCM与极光推送架构对比分析](docs/push-architecture-comparison.md)
-
-该文档包含：
-- FCM和极光推送的完整系统架构图
-- 各自的设计亮点深度分析
-- 技术实现细节对比
-- 选择建议和适用场景
-
-### 多平台推送架构（Android + iOS）
-
-如果需要同时支持Android和iOS平台，请参考：[多平台推送架构设计](docs/multi-platform-push-architecture.md)
-
-该文档包含：
-- 统一推送服务架构设计
-- iOS推送（APNs）集成方案
-- 平台适配器模式实现
-- 设备信息管理
-- 完整的代码示例和数据库设计
-- 最佳实践和实施步骤
-
-## 📚 更多资源
-
-- [Firebase Cloud Messaging 文档](https://firebase.google.com/docs/cloud-messaging)
-- [FCM Admin SDK 文档](https://firebase.google.com/docs/cloud-messaging/admin/send-messages)
-- [Android通知最佳实践](https://developer.android.com/develop/ui/views/notifications)
-
-## ❓ 常见问题
-
-### Q: Token获取失败？
-A: 检查 `google-services.json` 是否正确配置，确保包名匹配。
-
-### Q: 推送消息收不到？
-A: 
-1. 检查设备网络连接
-2. 确认Token是否有效
-3. 检查Android通知权限（Android 13+）
-4. 查看FCM控制台的错误日志
-
-### Q: 如何测试推送？
-A: 可以使用Firebase Console的"发送测试消息"功能，或使用Postman调用API。
-
-## 📝 许可证
+## 许可证
 
 MIT License
 
+## 联系方式
+
+如有问题或建议，欢迎提交 Issue。
