@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/colors.dart';
+import '../theme/animations.dart';
 
 /// 导航项配置
 class NavItem {
@@ -18,6 +19,7 @@ class NavItem {
 /// 底部导航栏组件
 ///
 /// 提供统一的底部导航栏，自动根据当前路由激活对应项
+/// 支持流畅的切换动画和视觉反馈
 class BottomNav extends StatelessWidget {
   /// 当前激活的路由
   final String currentRoute;
@@ -102,7 +104,7 @@ class BottomNav extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: items.map((item) {
           final isActive = _isRouteActive(item.route);
-          return _NavItemWidget(
+          return _AnimatedNavItemWidget(
             icon: item.icon,
             label: item.label,
             isActive: isActive,
@@ -114,14 +116,14 @@ class BottomNav extends StatelessWidget {
   }
 }
 
-/// 单个导航项组件
-class _NavItemWidget extends StatelessWidget {
+/// 带动画的单个导航项组件
+class _AnimatedNavItemWidget extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _NavItemWidget({
+  const _AnimatedNavItemWidget({
     required this.icon,
     required this.label,
     required this.isActive,
@@ -129,34 +131,106 @@ class _NavItemWidget extends StatelessWidget {
   });
 
   @override
+  State<_AnimatedNavItemWidget> createState() => _AnimatedNavItemWidgetState();
+}
+
+class _AnimatedNavItemWidgetState extends State<_AnimatedNavItemWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _colorAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppAnimations.tabSwitchDuration,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: AppAnimations.tabIconActiveScale,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: AppAnimations.tabIconScaleCurve,
+    ));
+
+    _colorAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: AppAnimations.tabIndicatorCurve,
+    ));
+
+    if (widget.isActive) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedNavItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isActive != oldWidget.isActive) {
+      if (widget.isActive) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         splashColor: AppColors.brandSage.withValues(alpha: 0.1),
         highlightColor: AppColors.brandSage.withValues(alpha: 0.05),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isActive
-                  ? AppColors.brandSage
-                  : AppColors.softGrey.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                color: isActive
-                    ? AppColors.brandSage
-                    : AppColors.softGrey.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 图标带缩放动画
+                ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Icon(
+                    widget.icon,
+                    size: 24,
+                    color: Color.lerp(
+                      AppColors.softGrey.withValues(alpha: 0.5),
+                      AppColors.brandSage,
+                      _colorAnimation.value,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // 标签带颜色动画
+                Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: Color.lerp(
+                      AppColors.softGrey.withValues(alpha: 0.5),
+                      AppColors.brandSage,
+                      _colorAnimation.value,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
