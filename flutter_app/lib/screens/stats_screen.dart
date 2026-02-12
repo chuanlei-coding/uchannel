@@ -1,11 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'dart:ui' as ui;
+import '../services/api_service.dart';
 import '../theme/colors.dart';
+import '../theme/opacity.dart';
+import '../widgets/bottom_nav.dart';
+import '../widgets/page_background.dart';
+import '../widgets/base_card.dart';
 
 /// 统计页面
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
+
+  @override
+  State<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends State<StatsScreen> {
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  // 统计数据
+  Map<String, dynamic>? _overviewStats;
+  Map<String, dynamic>? _weeklyStats;
+  List<Map<String, dynamic>> _categoryStats = [];
+  List<Map<String, dynamic>> _priorityStats = [];
+  List<Map<String, dynamic>> _heatmapData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final results = await Future.wait([
+        _apiService.getOverviewStats(),
+        _apiService.getWeeklyStats(),
+        _apiService.getCategoryStats(),
+        _apiService.getPriorityStats(),
+        _apiService.getHeatmapData(days: 28),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _overviewStats = results[0] as Map<String, dynamic>?;
+          _weeklyStats = results[1] as Map<String, dynamic>?;
+          _categoryStats = results[2] as List<Map<String, dynamic>>;
+          _priorityStats = results[3] as List<Map<String, dynamic>>;
+          _heatmapData = results[4] as List<Map<String, dynamic>>;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = '加载统计数据失败: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +85,7 @@ class StatsScreen extends StatelessWidget {
 
                 // 内容区域
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        // 统计卡片
-                        _buildStatsCards(),
-                        const SizedBox(height: 24),
-
-                        // 成长趋势图表
-                        _buildTrendChart(),
-                        const SizedBox(height: 24),
-
-                        // 生命进度热力图
-                        _buildHeatmap(),
-                        const SizedBox(height: 24),
-
-                        // AI 洞察
-                        _buildAIInsight(),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
+                  child: _buildContent(),
                 ),
 
                 // 底部导航
@@ -60,34 +98,86 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.brandSage),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: AppColors.brandSage.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage!,
+              style: const TextStyle(fontSize: 14, color: AppColors.darkGrey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadStats,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brandSage,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('重试'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          // 统计卡片
+          _buildStatsCards(),
+          const SizedBox(height: 24),
+
+          // 分类统计
+          if (_categoryStats.isNotEmpty) _buildCategoryStats(),
+          if (_categoryStats.isNotEmpty) const SizedBox(height: 24),
+
+          // 成长趋势图表
+          _buildTrendChart(),
+          const SizedBox(height: 24),
+
+          // 生命进度热力图
+          _buildHeatmap(),
+          const SizedBox(height: 24),
+
+          // AI 洞察
+          _buildAIInsight(),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBackgroundDecorations(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: -MediaQuery.of(context).size.height * 0.05,
-          left: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.6,
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.sageGreen.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: MediaQuery.of(context).size.height * 0.15,
-          right: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.5,
-            height: MediaQuery.of(context).size.height * 0.5,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.softTerracotta.withValues(alpha: 0.05),
-            ),
-          ),
-        ),
-      ],
+    return PageBackground(
+      topLeft: const BackgroundCircle(
+        widthFactor: 0.6,
+        heightFactor: 0.6,
+        color: AppColors.sageGreen,
+        alpha: 0.1,
+      ),
+      bottomRight: const BackgroundCircle(
+        widthFactor: 0.5,
+        heightFactor: 0.5,
+        color: AppColors.softTerracotta,
+        alpha: 0.05,
+      ),
     );
   }
 
@@ -97,36 +187,16 @@ class StatsScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(
-                color: AppColors.borderLight,
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new,
-              size: 18,
-              color: AppColors.sageGreen,
-            ),
+          IconButton(
+            onPressed: _loadStats,
+            icon: const Icon(Icons.refresh, color: AppColors.sageGreen),
           ),
           const Text(
             '数据洞察',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF2D2A26),
+              color: AppColors.darkGrey,
             ),
           ),
           Container(
@@ -135,10 +205,7 @@ class StatsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
-              border: Border.all(
-                color: AppColors.borderLight,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.borderLight, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.03),
@@ -147,7 +214,7 @@ class StatsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.calendar_today,
               size: 18,
               color: AppColors.sageGreen,
@@ -159,25 +226,31 @@ class StatsScreen extends StatelessWidget {
   }
 
   Widget _buildStatsCards() {
+    final completedTasks = _overviewStats?['completedTasks'] ?? 0;
+    final totalTasks = _overviewStats?['totalTasks'] ?? 1;
+    final completionRate = totalTasks > 0
+        ? ((completedTasks / totalTasks) * 100).toStringAsFixed(0)
+        : '0';
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
-            label: '专注时长',
-            value: '24.5',
-            unit: 'hrs',
+            label: '本周任务',
+            value: (_weeklyStats?['weeklyCompleted'] ?? 0).toString(),
+            unit: '/ ${_weeklyStats?['weeklyTotal'] ?? 0} 完成',
             color: AppColors.sageGreen,
-            trend: '+12%',
+            trend: '+${(_weeklyStats?['completionRate'] ?? 0).toStringAsFixed(0)}%',
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildStatCard(
             label: '完成目标',
-            value: '42',
-            unit: 'tasks',
+            value: completionRate,
+            unit: '%',
             color: AppColors.softTerracotta,
-            trend: '88%',
+            trend: '$completedTasks 个',
             icon: Icons.verified,
           ),
         ),
@@ -193,23 +266,8 @@ class StatsScreen extends StatelessWidget {
     required String trend,
     IconData? icon,
   }) {
-    return Container(
+    return BaseCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.borderLight,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -233,7 +291,7 @@ class StatsScreen extends StatelessWidget {
                   fontSize: 32,
                   fontWeight: FontWeight.w300,
                   fontStyle: FontStyle.italic,
-                  color: Color(0xFF2D2A26),
+                  color: AppColors.darkGrey,
                 ),
               ),
               const SizedBox(width: 4),
@@ -250,18 +308,11 @@ class StatsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
-                icon ?? Icons.trending_up,
-                size: 12,
-                color: color,
-              ),
+              Icon(icon ?? Icons.trending_up, size: 12, color: color),
               const SizedBox(width: 4),
               Text(
-                '较上周增加 $trend',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: color,
-                ),
+                '较上周 $trend',
+                style: TextStyle(fontSize: 10, color: color),
               ),
             ],
           ),
@@ -270,24 +321,79 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTrendChart() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.borderLight,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildCategoryStats() {
+    return BaseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '分类统计',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.darkGrey,
+            ),
           ),
+          const SizedBox(height: 16),
+          ..._categoryStats.map((stat) {
+            final name = stat['name'] as String;
+            final count = stat['count'] as int;
+            final color = Color(
+              int.parse((stat['color'] as String).substring(1), radix: 16) +
+                  0xFF000000,
+            );
+            final maxCount = _categoryStats
+                    .map((s) => s['count'] as int)
+                    .reduce((a, b) => a > b ? a : b) ??
+                1;
+            final width = count / maxCount;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                      Text(
+                        '$count',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: width,
+                      backgroundColor: AppColors.sand.withValues(alpha: 0.3),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                      minHeight: 6,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
+    );
+  }
+
+  Widget _buildTrendChart() {
+    return BaseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -302,7 +408,7 @@ class StatsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF2D2A26),
+                      color: AppColors.darkGrey,
                     ),
                   ),
                   Text(
@@ -329,7 +435,7 @@ class StatsScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '深度专注',
+                        '已完成',
                         style: TextStyle(
                           fontSize: 10,
                           color: AppColors.warmGrey,
@@ -350,7 +456,7 @@ class StatsScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '常规计划',
+                        '总任务',
                         style: TextStyle(
                           fontSize: 10,
                           color: AppColors.warmGrey,
@@ -389,23 +495,7 @@ class StatsScreen extends StatelessWidget {
   }
 
   Widget _buildHeatmap() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.borderLight,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return BaseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -419,7 +509,7 @@ class StatsScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF2D2A26),
+                  color: AppColors.darkGrey,
                 ),
               ),
               Text(
@@ -442,7 +532,17 @@ class StatsScreen extends StatelessWidget {
             ),
             itemCount: 28,
             itemBuilder: (context, index) {
-              final intensity = (index % 5) / 4.0;
+              // 尝试从真实数据获取强度
+              int intensityLevel = 0;
+              if (_heatmapData.isNotEmpty && index < _heatmapData.length) {
+                final completedCount =
+                    _heatmapData[index]['completedCount'] as int? ?? 0;
+                intensityLevel = (completedCount.clamp(0, 10) / 2).floor();
+              } else {
+                intensityLevel = index % 5;
+              }
+
+              final intensity = intensityLevel / 4.0;
               Color color;
               if (intensity < 0.2) {
                 color = AppColors.heatmapLight;
@@ -512,7 +612,7 @@ class StatsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F4EE),
+        color: AppColorsSecondary.aiInsightBg,
         borderRadius: BorderRadius.circular(16),
         border: Border(
           left: BorderSide(
@@ -549,70 +649,7 @@ class StatsScreen extends StatelessWidget {
   }
 
   Widget _buildBottomNav(BuildContext context) {
-    return Container(
-      height: 96,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderLight,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.auto_awesome, '助手', false, () {
-            context.go('/chat');
-          }),
-          _buildNavItem(Icons.calendar_month, '日程', false, () {
-            context.go('/schedule');
-          }),
-          _buildNavItem(Icons.explore, '发现', false, () {
-            context.go('/discover');
-          }),
-          _buildNavItem(Icons.analytics, '统计', true, () {}),
-          _buildNavItem(Icons.settings, '设置', false, () {
-            context.go('/settings');
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    IconData icon,
-    String label,
-    bool isActive,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 26,
-            color: isActive
-                ? AppColors.sageGreen
-                : AppColors.warmGrey.withValues(alpha: 0.6),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              color: isActive
-                  ? AppColors.sageGreen
-                  : AppColors.warmGrey.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
+    return BottomNav.defaultNav(currentRoute: '/stats');
   }
 }
 

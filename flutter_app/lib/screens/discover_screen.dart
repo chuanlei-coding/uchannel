@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../theme/colors.dart';
+import '../widgets/bottom_nav.dart';
+import '../widgets/page_background.dart';
+import '../widgets/base_card.dart';
 
 /// 发现页面
 class DiscoverScreen extends StatelessWidget {
@@ -55,34 +57,20 @@ class DiscoverScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBackgroundDecorations(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: -MediaQuery.of(context).size.height * 0.1,
-          left: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.brandSage.withValues(alpha: 0.05),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: -MediaQuery.of(context).size.height * 0.1,
-          right: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.softGold.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-      ],
+    Widget _buildBackgroundDecorations(BuildContext context) {
+    return PageBackground(
+      topLeft: const BackgroundCircle(
+        widthFactor: 0.4,
+        heightFactor: 0.4,
+        color: AppColors.brandSage,
+        alpha: 0.05,
+      ),
+      bottomRight: const BackgroundCircle(
+        widthFactor: 0.4,
+        heightFactor: 0.4,
+        color: AppColors.softGold,
+        alpha: 0.1,
+      ),
     );
   }
 
@@ -298,72 +286,18 @@ class DiscoverScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTemplateItem({
+    Widget _buildTemplateItem({
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.borderLight,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.creamBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.brandSage.withValues(alpha: 0.1),
-                width: 1,
-              ),
-            ),
-            child: Icon(icon, color: AppColors.brandSage),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.darkGrey,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.mutedGrey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: AppColors.mutedGrey.withValues(alpha: 0.3),
-          ),
-        ],
+    return BaseCard.rounded(
+      padding: EdgeInsets.zero,
+      child: CardListItem(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        padding: const EdgeInsets.all(20),
       ),
     );
   }
@@ -469,70 +403,7 @@ class DiscoverScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
-    return Container(
-      height: 96,
-      decoration: BoxDecoration(
-        color: AppColors.creamBg.withValues(alpha: 0.95),
-        border: Border(
-          top: BorderSide(
-            color: AppColors.darkGrey.withValues(alpha: 0.05),
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.smart_toy, '助手', false, () {
-            context.go('/chat');
-          }),
-          _buildNavItem(Icons.calendar_today, '日程', false, () {
-            context.go('/schedule');
-          }),
-          _buildNavItem(Icons.explore, '发现', true, () {}),
-          _buildNavItem(Icons.bar_chart, '统计', false, () {
-            context.go('/stats');
-          }),
-          _buildNavItem(Icons.settings, '设置', false, () {
-            context.go('/settings');
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    IconData icon,
-    String label,
-    bool isActive,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: isActive
-                ? AppColors.brandSage
-                : AppColors.mutedGrey.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              color: isActive
-                  ? AppColors.brandSage
-                  : AppColors.mutedGrey.withValues(alpha: 0.5),
-            ),
-          ),
-        ],
-      ),
-    );
+      Widget _buildBottomNav(BuildContext context) {
+    return BottomNav.defaultNav(currentRoute: '/discover');
   }
 }

@@ -1,0 +1,6 @@
+#FileLock
+#Sat Jan 31 23:33:21 CST 2026
+server=192.168.1.44\:63434
+hostName=bogon
+method=file
+id=19c14aff376cc94f4caf8e1b9ebd545349f9c410fef

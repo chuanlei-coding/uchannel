@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../models/message.dart';
+import '../services/chat_service.dart';
 import '../theme/colors.dart';
+import '../widgets/bottom_nav.dart';
 import '../widgets/message_item.dart';
+import '../widgets/page_background.dart';
 
 /// 聊天页面
 class ChatScreen extends StatefulWidget {
@@ -15,58 +18,62 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<Message> _messages = [];
+
+  // 获取聊天服务
+  ChatService get _chatService => context.read<ChatService>();
+
+  // 是否正在发送消息
+  bool _isSending = false;
 
   @override
   void initState() {
     super.initState();
-    _addWelcomeMessage();
+    _initChat();
   }
 
-  void _addWelcomeMessage() {
-    setState(() {
-      _messages.add(Message(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: '"岁序更替，步履轻盈。"',
-        contentSecondary: '早安。今天你的行程看起来很宁静。需要我为你回顾一下下午的冥想预约吗？',
-        sender: MessageSender.assistant,
-        timestamp: DateTime.now(),
-      ));
-    });
+  Future<void> _initChat() async {
+    // 初始化聊天服务（如果还没初始化）
+    if (!_chatService.isInitialized) {
+      await _chatService.init();
+    }
+
+    // 如果没有消息，添加欢迎消息
+    if (_chatService.messageCount == 0) {
+      await _addWelcomeMessage();
+    }
+
+    _scrollToBottom();
   }
 
-  void _sendMessage() {
+  Future<void> _addWelcomeMessage() async {
+    await _chatService.addLocalMessage(Message(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      content: '"岁序更替，步履轻盈。"',
+      contentSecondary: '早安。今天你的行程看起来很宁静。需要我为你回顾一下下午的冥想预约吗？',
+      sender: MessageSender.assistant,
+      timestamp: DateTime.now(),
+    ));
+  }
+
+  void _sendMessage() async {
     final text = _inputController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
     setState(() {
-      _messages.add(Message(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: text,
-        sender: MessageSender.user,
-        timestamp: DateTime.now(),
-      ));
+      _isSending = true;
     });
 
     _inputController.clear();
     _scrollToBottom();
 
-    // 模拟助手回复
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _messages.add(Message(
-            id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),
-            content: '我已经为您重新调整了后续行程。现在，您的节奏更加从容了。',
-            sender: MessageSender.suggestion,
-            timestamp: DateTime.now(),
-            scheduleTitle: '下午冥想',
-            scheduleTime: '15:00 - 15:30',
-          ));
-        });
-        _scrollToBottom();
-      }
+    // 发送消息（同时保存到本地和服务器）
+    await _chatService.sendMessage(text);
+
+    setState(() {
+      _isSending = false;
     });
+
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -109,15 +116,54 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 // 消息列表
                 Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      return MessageItem(message: _messages[index]);
+                  child: Consumer<ChatService>(
+                    builder: (context, chatService, child) {
+                      final messages = chatService.messages;
+
+                      if (chatService.isLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: AppColors.brandSage),
+                        );
+                      }
+
+                      if (messages.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline,
+                                size: 64,
+                                color: AppColors.softGrey.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '开始与 Vita 对话',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.softGrey.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        key: const ValueKey('message_list'),
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          return MessageItem(
+                            key: ValueKey(messages[index].id),
+                            message: messages[index],
+                          );
+                        },
+                      );
                     },
                   ),
                 ),
@@ -136,34 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildBackgroundDecorations() {
-    return Stack(
-      children: [
-        Positioned(
-          top: -MediaQuery.of(context).size.height * 0.1,
-          left: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.5,
-            height: MediaQuery.of(context).size.height * 0.5,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.brandSage.withValues(alpha: 0.05),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: MediaQuery.of(context).size.height * 0.1,
-          right: -MediaQuery.of(context).size.width * 0.1,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.brandTeal.withValues(alpha: 0.05),
-            ),
-          ),
-        ),
-      ],
-    );
+    return PageBackground.defaultDecorations();
   }
 
   Widget _buildHeader() {
@@ -178,7 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
               const SizedBox(width: 12),
               const Text(
                 'Vita Assistant',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.5,
@@ -187,28 +206,66 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ],
           ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(
-                color: AppColors.borderLightAlt,
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+          // 清空聊天记录按钮
+          GestureDetector(
+            onTap: () => _showClearDialog(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(
+                  color: AppColors.borderLightAlt,
+                  width: 1,
                 ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.delete_outline,
+                color: AppColors.softGrey,
+                size: 20,
+              ),
             ),
-            child: Icon(
-              Icons.more_horiz,
-              color: AppColors.softGrey,
-            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('清空聊天记录'),
+        content: const Text('确定要清空所有聊天记录吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _chatService.clearMessages();
+              await _addWelcomeMessage();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('聊天记录已清空'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('清空'),
           ),
         ],
       ),
@@ -267,7 +324,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildDateLabel() {
     final now = DateTime.now();
-    final weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+    const weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
@@ -318,12 +375,13 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _inputController,
+              enabled: !_isSending,
               style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.darkGrey,
               ),
               decoration: InputDecoration(
-                hintText: '与 Vita 交流...',
+                hintText: _isSending ? '发送中...' : '与 Vita 交流...',
                 hintStyle: TextStyle(
                   color: AppColors.softGrey.withValues(alpha: 0.4),
                 ),
@@ -334,13 +392,15 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           GestureDetector(
-            onTap: _sendMessage,
+            onTap: _isSending ? null : _sendMessage,
             child: Container(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.brandSage,
+                color: _isSending
+                    ? AppColors.softGrey.withValues(alpha: 0.5)
+                    : AppColors.brandSage,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.03),
@@ -349,11 +409,20 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.arrow_upward,
-                size: 18,
-                color: Colors.white,
-              ),
+              child: _isSending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.arrow_upward,
+                      size: 18,
+                      color: Colors.white,
+                    ),
             ),
           ),
         ],
@@ -362,70 +431,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildBottomNav(BuildContext context) {
-    return Container(
-      height: 84,
-      decoration: BoxDecoration(
-        color: AppColors.creamBg.withValues(alpha: 0.8),
-        border: Border(
-          top: BorderSide(
-            color: AppColors.darkGrey.withValues(alpha: 0.05),
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.chat_bubble, '助手', true, () {}, context),
-          _buildNavItem(Icons.calendar_today, '日程', false, () {
-            context.go('/schedule');
-          }, context),
-          _buildNavItem(Icons.explore, '发现', false, () {
-            context.go('/discover');
-          }, context),
-          _buildNavItem(Icons.bar_chart, '统计', false, () {
-            context.go('/stats');
-          }, context),
-          _buildNavItem(Icons.settings, '设置', false, () {
-            context.go('/settings');
-          }, context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    IconData icon,
-    String label,
-    bool isActive,
-    VoidCallback onTap,
-    BuildContext context,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: isActive
-                ? AppColors.brandSage
-                : AppColors.softGrey.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive
-                  ? AppColors.brandSage
-                  : AppColors.softGrey.withValues(alpha: 0.5),
-            ),
-          ),
-        ],
-      ),
-    );
+    return BottomNav.defaultNav(currentRoute: '/chat');
   }
 }

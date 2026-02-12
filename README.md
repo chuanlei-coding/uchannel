@@ -7,10 +7,9 @@ Vita 是一个优雅的个人效率管理应用，帮助你更好地规划和实
 ```
 uchannel/
 ├── flutter_app/              # Flutter 前端应用
-├── backend-java/             # Java Spring Boot 后端
-├── docs/                   # 后端相关文档
-├── scripts/                 # 后端构建和启动脚本
-└── README.md              # 项目说明
+├── backend-rust/             # Rust 后端服务
+├── scripts/                  # 构建和启动脚本
+└── README.md                 # 项目说明
 ```
 
 ## 功能特性
@@ -26,9 +25,9 @@ uchannel/
 
 ### 后端服务
 
-- **聊天服务** - 支持 AI 对话
-- **推送通知** - Firebase 消息推送
-- **消息存储** - 历史消息持久化
+- **聊天服务** - 支持 AI 对话（通义千问）
+- **任务管理** - 完整的 CRUD 操作
+- **统计分析** - 任务统计和热力图
 
 ## 快速开始
 
@@ -62,8 +61,8 @@ flutter run
 ### 后端服务
 
 **环境要求：**
-- JDK 17+
-- Maven 3.6+
+- Rust 1.70+ (安装: https://rustup.rs)
+- SQLite3
 
 **启动服务：**
 
@@ -72,50 +71,25 @@ flutter run
 ./scripts/start-backend.sh
 
 # 或手动启动
-cd backend-java
-mvn spring-boot:run
+cd backend-rust
+cargo run
 ```
 
 服务默认运行在 `http://localhost:8080`
 
-## 文档
-
-### 后端相关
-
-- [国内部署指南](docs/china-deployment-guide.md) - Firebase 在国内的替代方案
-- [推送架构对比](docs/push-architecture-comparison.md) - FCM 与极光推送对比
-- [多平台推送架构](docs/multi-platform-push-architecture.md) - Android + iOS 统一推送
-- [推送通知架构](docs/push-notification-architecture.md) - 完整推送系统设计
-- [WebSocket 推送难点](docs/websocket-push-challenges.md) - 自建推送的 7 大难点
-
-### 后端配置
-
-- `backend-java/QWEN_CONFIG.md` - Qwen AI 配置说明
-
-## 项目特性
-
-### UI/UX 设计
-
-基于 **Vita** 品牌理念，采用柔和优雅的设计风格：
-
-- **配色方案** - 鼠尾草绿、水鸭青色为主
-- **字体** - Newsreader（衬线）+ 系统字体
-- **圆角** - 大圆角，柔和感
-- **阴影** - 轻阴影，层次感
-
-### 技术栈
+## 技术栈
 
 **前端：**
 - Flutter 3.10+
 - Dart 3.0+
-- Google Fonts
 - go_router（导航）
+- Dio（HTTP 客户端）
 
 **后端：**
-- Java 17
-- Spring Boot
-- H2 Database
-- Firebase Cloud Messaging
+- Rust (Axum web framework)
+- SQLite (SQLx)
+- Tokio (异步运行时)
+- 通义千问 API
 
 ## 开发指南
 
@@ -133,34 +107,29 @@ flutter test
 
 # 查看所有可用设备
 flutter devices
-
-# 热重载（开发时）
-# 在 IDE 中按 'r' 键
-# 或在命令行使用 flutter run
 ```
 
 ### 后端开发
 
 ```bash
+cd backend-rust
+
 # 编译项目
-mvn clean compile
+cargo build
 
 # 运行测试
-mvn test
+cargo test
 
-# 打包 JAR
-mvn package
+# 构建发布版本
+cargo build --release
 ```
 
 ## 脚本说明
 
-### 后端脚本
-
 | 脚本 | 说明 |
 |------|------|
-| `build-backend.sh` | 构建后端 JAR 包 |
-| `start-backend.sh` | 启动后端服务（Linux/Mac） |
-| `start-backend.bat` | 启动后端服务（Windows） |
+| `build-backend.sh` | 构建后端二进制文件 |
+| `start-backend.sh` | 启动后端服务 |
 | `generate-ssl-cert.sh` | 生成 SSL 证书 |
 
 详细说明：[scripts/README.md](scripts/README.md)
@@ -178,26 +147,14 @@ flutter_app/build/app/outputs/flutter-apk/
 ### 后端
 
 ```
-backend-java/target/
-├── *.jar                 # Spring Boot 可执行 JAR
-└── *.original             # 原始打包文件
+backend-rust/target/
+├── debug/uchannel-backend     # Debug 版本
+└── release/uchannel-backend   # Release 版本
 ```
 
 ## 清理历史
 
-项目已于 **2026-01-27** 从 React Native 重构为 Flutter。以下是已删除的过期内容：
-
-**已删除的文档（React Native 时代）：**
-- Android 原生聊天界面文档
-- Android UI 设计指南
-- 聊天历史功能文档
-- 主页重新设计文档
-- UI 美化文档
-- UI/UX 优化文档
-
-**已删除的脚本（Android 原生）：**
-- Android APK 构建脚本
-- 完整构建脚本
+项目已于 **2026-01-27** 从 React Native 重构为 Flutter，**2026-02-12** 从 Java Spring Boot 重构为 Rust。
 
 详细的清理说明：[CLEANUP_NOTES.md](CLEANUP_NOTES.md)
 
