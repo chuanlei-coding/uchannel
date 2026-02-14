@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /opt/homebrew/opt/node@20/bin/node "$@"

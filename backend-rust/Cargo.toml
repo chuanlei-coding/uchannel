@@ -14,11 +14,11 @@ tower-http = { version = "0.5", features = ["cors", "trace"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
-# Database
-sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite"] }
+# Database (使用 rustls 避免 OpenSSL 依赖)
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite", "tls-rustls"] }
 
-# HTTP client for Qwen API
-reqwest = { version = "0.11", features = ["json"] }
+# HTTP client for Qwen API (使用 rustls 避免 OpenSSL 依赖)
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
 
 # Date/time handling
 chrono = { version = "0.4", features = ["serde"] }
