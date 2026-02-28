@@ -10,7 +10,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTaskStore } from '../../stores';
-import { TaskCard } from '../../components';
+import { TaskCard, CalendarPicker } from '../../components';
 import { Task, TaskStatus } from '../../models/Task';
 import { Colors } from '../../theme';
 import { Spacing, BorderRadius } from '../../theme';
@@ -24,6 +24,7 @@ const ScheduleScreen: React.FC = () => {
   const navigation = useNavigation();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const {
     tasks,
@@ -66,6 +67,19 @@ const ScheduleScreen: React.FC = () => {
     navigation.navigate('AddTodo' as never);
   };
 
+  const handleCalendarPress = () => {
+    setShowDatePicker(true);
+  };
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date);
+    loadTasksByDate(date);
+  };
+
+  const handleCloseDatePicker = () => {
+    setShowDatePicker(false);
+  };
+
   const formatDate = () => {
     const date = new Date(selectedDate);
     const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -99,7 +113,7 @@ const ScheduleScreen: React.FC = () => {
           <Text style={styles.headerTitle}>日程安排</Text>
           <Text style={styles.headerDate}>{formatDate()}</Text>
         </View>
-        <TouchableOpacity style={styles.calendarButton}>
+        <TouchableOpacity style={styles.calendarButton} onPress={handleCalendarPress}>
           <Icon name="calendar-today" size={24} color={Colors.brandSage} />
         </TouchableOpacity>
       </View>
@@ -175,6 +189,14 @@ const ScheduleScreen: React.FC = () => {
       <TouchableOpacity style={styles.fab} onPress={handleAddTask}>
         <Icon name="add" size={28} color={Colors.white} />
       </TouchableOpacity>
+
+      {/* 日期选择器 */}
+      <CalendarPicker
+        visible={showDatePicker}
+        selectedDate={selectedDate}
+        onDateSelect={handleDateSelect}
+        onClose={handleCloseDatePicker}
+      />
     </View>
   );
 };

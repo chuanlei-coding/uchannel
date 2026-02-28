@@ -70,6 +70,8 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   const panY = useRef(0);
   const isLongPressTriggered = useRef(false);
   const recordStartTime = useRef(0);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRecorderStarted = useRef(false);
 
   // 最大录音时长定时器
   const maxDurationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -149,6 +151,8 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         return;
       }
 
+      // 标记录音器已启动
+      isRecorderStarted.current = true;
       recordStartTime.current = Date.now();
       setRecordState('recording');
       setRecordDuration(0);
@@ -180,12 +184,19 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   const stopRecording = useCallback(async (forceSend = false) => {
     clearMaxDurationTimer();
 
+    // 检查录音器是否真正启动
+    if (!isRecorderStarted.current) {
+      setRecordState('idle');
+      return;
+    }
+
     if (recordState !== 'recording') return;
 
     try {
       const uri = await AudioService.stopRecording();
       AudioService.removeRecordingListener();
 
+      isRecorderStarted.current = false;
       const duration = recordDuration;
       setRecordState('idle');
       setRecordDuration(0);
@@ -209,22 +220,32 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     } catch (error) {
       console.error('Stop recording error:', error);
       AudioService.removeRecordingListener();
+      isRecorderStarted.current = false;
       setRecordState('idle');
     }
   }, [recordState, recordDuration, minDuration, clearMaxDurationTimer, onRecordComplete, onRecordCancel]);
 
   // 取消录音
   const cancelRecording = useCallback(async () => {
+    clearMaxDurationTimer();
+
+    // 检查录音器是否真正启动
+    if (!isRecorderStarted.current) {
+      setRecordState('idle');
+      onRecordCancel?.();
+      return;
+    }
+
     if (recordState !== 'recording') return;
 
     setRecordState('canceling');
-    clearMaxDurationTimer();
 
     try {
       await AudioService.stopRecording();
       AudioService.removeRecordingListener();
     } catch (_) {}
 
+    isRecorderStarted.current = false;
     setRecordState('idle');
     setRecordDuration(0);
     setCurrentMetering(0);
@@ -238,9 +259,10 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         isLongPressTriggered.current = false;
+        isRecorderStarted.current = false;
         panY.current = 0;
         // 延迟触发长按（模拟 onLongPress）
-        setTimeout(() => {
+        longPressTimer.current = setTimeout(() => {
           if (!isLongPressTriggered.current) {
             isLongPressTriggered.current = true;
             startRecording();
@@ -257,6 +279,12 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         }
       },
       onPanResponderRelease: () => {
+        // 清除长按定时器
+        if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
+        }
+
         if (isLongPressTriggered.current) {
           if (panY.current < CANCEL_THRESHOLD) {
             cancelRecording();
@@ -267,6 +295,12 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         isLongPressTriggered.current = false;
       },
       onPanResponderTerminate: () => {
+        // 清除长按定时器
+        if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
+        }
+
         if (isLongPressTriggered.current) {
           cancelRecording();
         }
@@ -286,10 +320,16 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   useEffect(() => {
     return () => {
       clearMaxDurationTimer();
-      try {
-        AudioService.stopRecording();
-        AudioService.removeRecordingListener();
-      } catch (_) {}
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+      if (isRecorderStarted.current) {
+        try {
+          AudioService.stopRecording();
+          AudioService.removeRecordingListener();
+        } catch (_) {}
+      }
     };
   }, [clearMaxDurationTimer]);
 

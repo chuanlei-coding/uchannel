@@ -5,3 +5,4 @@ export type { ButtonVariant, ButtonSize, IconPosition } from './PrimaryButton';
 export { default as PageHeader, SimplePageHeader } from './PageHeader';
 export { default as LoadingIndicator } from './LoadingIndicator';
 export { default as EmptyState } from './EmptyState';
+export { default as CalendarPicker } from './CalendarPicker';
