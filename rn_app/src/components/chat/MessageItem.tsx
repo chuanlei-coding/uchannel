@@ -5,6 +5,7 @@ import { Message, MessageSender, MessageType } from '../../models/Message';
 import { Colors } from '../../theme';
 import { Spacing, BorderRadius, Shadows } from '../../theme';
 import * as AudioService from '../../services/audioService';
+import { ImagePreview } from '../common';
 
 // ============== 旧的 react-native-audio-api 实现 (备份，等稳定后删除) ==============
 /*
@@ -193,11 +194,24 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isImage = message.type === MessageType.image;
   const isVoice = message.type === MessageType.voice;
 
+  // 图片预览状态
+  const [showImagePreview, setShowImagePreview] = useState(false);
+
   const formatTime = (date: Date): string => {
     return date.toLocaleTimeString('zh-CN', {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // 打开图片预览
+  const handleImagePress = () => {
+    setShowImagePreview(true);
+  };
+
+  // 关闭图片预览
+  const handleCloseImagePreview = () => {
+    setShowImagePreview(false);
   };
 
   if (isSuggestion) {
@@ -240,11 +254,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         >
           {/* 图片消息 */}
           {isImage && message.imageUri && (
-            <Image
-              source={{ uri: message.imageUri }}
-              style={styles.messageImage}
-              resizeMode="cover"
-            />
+            <TouchableOpacity
+              onPress={handleImagePress}
+              activeOpacity={0.9}
+            >
+              <Image
+                source={{ uri: message.imageUri }}
+                style={styles.messageImage}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
           )}
 
           {/* 文字消息 */}
@@ -266,6 +285,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             {formatTime(message.timestamp)}
           </Text>
         </View>
+      )}
+
+      {/* 图片预览 */}
+      {isImage && message.imageUri && (
+        <ImagePreview
+          visible={showImagePreview}
+          imageUri={message.imageUri}
+          onClose={handleCloseImagePreview}
+        />
       )}
     </View>
   );
