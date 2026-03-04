@@ -314,31 +314,18 @@ const ChatScreen: React.FC = () => {
         ) : (
           /* 正常输入 UI */
           <View style={styles.inputBar}>
-            {/* 左侧：无文字显示语音按钮，有文字显示附件图标 */}
-            {inputText.trim() ? (
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={handleAttach}
-              >
-                <Icon
-                  name="add-circle"
-                  size={24}
-                  color={Colors.softGrey + '99'}
-                />
-              </TouchableOpacity>
-            ) : (
-              <VoiceRecordButton
-                onRecordComplete={handleRecordComplete}
-                onRecordStart={handleRecordStart}
-                onRecordCancel={handleRecordCancel}
-                minDuration={1}
-                maxDuration={60}
-              />
-            )}
+            {/* 左侧：语音按钮 */}
+            <VoiceRecordButton
+              onRecordComplete={handleRecordComplete}
+              onRecordStart={handleRecordStart}
+              onRecordCancel={handleRecordCancel}
+              minDuration={1}
+              maxDuration={60}
+            />
 
             <TextInput
               style={styles.input}
-              placeholder={isLoading ? '发送中...' : '与 Vita 交流...'}
+              placeholder={isLoading ? '发送中...' : '发消息或按住说话...'}
               placeholderTextColor={Colors.softGrey + '66'}
               value={inputText}
               onChangeText={setInputText}
@@ -347,31 +334,23 @@ const ChatScreen: React.FC = () => {
               multiline
             />
 
-            {/* 右侧：无文字显示附件图标，有文字显示发送按钮 */}
-            {inputText.trim() ? (
-              <TouchableOpacity
-                style={[
-                  styles.sendButton,
-                  isLoading && styles.sendButtonDisabled,
-                ]}
-                onPress={handleSend}
-                disabled={isLoading}
-              >
-                <Icon
-                  name="arrow-upward"
-                  size={18}
-                  color={Colors.white}
-                />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.iconButton} onPress={handleAttach}>
-                <Icon
-                  name="add-circle"
-                  size={24}
-                  color={Colors.softGrey + '99'}
-                />
-              </TouchableOpacity>
-            )}
+            {/* 右侧：表情图标 */}
+            <TouchableOpacity style={styles.iconButton} onPress={() => {}}>
+              <Icon
+                name="sentiment-satisfied-alt"
+                size={24}
+                color={Colors.softGrey + '99'}
+              />
+            </TouchableOpacity>
+
+            {/* 右侧：附件按钮 */}
+            <TouchableOpacity style={styles.iconButton} onPress={handleAttach}>
+              <Icon
+                name="add-circle"
+                size={24}
+                color={Colors.softGrey + '99'}
+              />
+            </TouchableOpacity>
           </View>
         )}
       </KeyboardAvoidingView>
